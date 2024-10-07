@@ -6,10 +6,18 @@ import Redis from 'ioredis'
 
 import * as session from 'express-session';
 import * as passport from 'passport';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('secure/api');
+  
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true
+    })
+  );
   //const RedisStore =  RedisStore(session);
   const redisClient = new Redis({
     host: process.env.REDIS_HOST,

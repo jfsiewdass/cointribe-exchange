@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { LocalAuthGuard } from 'src/guard/auth/local-auth.guard';
+import { AuthenticatedGuard } from 'src/guard/auth/authenticated.guard';
 // import { UpdateUserDto } from './dto/login-user.dto';
 
 @Controller('user')
@@ -12,18 +14,21 @@ export class UserController {
   register(@Body() createUserDto: CreateUserDto) {
     return this.userService.register(createUserDto);
   }
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
     return {
       msj: 'Logged in'
     };
   }
+  @UseGuards(AuthenticatedGuard)
   @Get('info')
   getUsers(@Request() req) {
     return {
       data: req.user
     };
   }
+  @UseGuards(AuthenticatedGuard)
   @Post('logout')
   logout(@Request() req) {
     req.logout(() => {
