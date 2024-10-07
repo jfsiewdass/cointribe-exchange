@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
+import { Wallet } from "src/wallet/schemas/wallet.schema";
 
 export type UserDocument = User & Document;
 
@@ -20,8 +21,8 @@ export class User {
     @Prop({ required: true })
     password: string;
 
-    // @Prop({type: [{ type: Types.ObjectId, ref: 'Wallet'}]})
-    // wallets: [Wallet];
+    @Prop({type: [{ type: Types.ObjectId, ref: 'Wallet'}]})
+    wallets: [Wallet];
 }
 
 

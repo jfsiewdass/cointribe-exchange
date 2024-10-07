@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
+import { WalletModule } from './wallet/wallet.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -13,7 +15,9 @@ import { UserModule } from './user/user.module';
       limit: parseInt(process.env.RATE_LIMIT)
     }]),
     MongooseModule.forRoot(process.env.DB_URI),
-    UserModule
+    UserModule,
+    WalletModule,
+    TransactionModule
   ],
   providers: [AppService],
 })
