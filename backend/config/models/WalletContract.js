@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
 
-const walletContractScheme = Schema({
+const mongoose = require('mongoose')
+const walletContractScheme = mongoose.Schema({
     address: {
         type: String,
         unique: true,

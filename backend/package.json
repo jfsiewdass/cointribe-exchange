@@ -10,6 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^8.7.0"
+    "@truffle/contract": "^4.6.31",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "app-root-path": "^3.1.0",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.7.0",
+    "web3": "^4.13.0"
   }
 }
