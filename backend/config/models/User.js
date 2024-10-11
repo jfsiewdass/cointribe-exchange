@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+const mongoose = require('mongoose')
 
-const userScheme = Schema({
+const userScheme = mongoose.Schema({
     firstName: String,
     lastName: String,
     email: {
@@ -12,6 +12,6 @@ const userScheme = Schema({
         type: String,
         required: true
     },
-    wallets: [{type: Schema.Types.ObjectId, ref: 'Wallet'}]
+    wallets: [{type: mongoose.Schema.Types.ObjectId, ref: 'Wallet'}]
 })
 module.exports = mongoose.model('User', userScheme);

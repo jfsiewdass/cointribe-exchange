@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+const mongoose = require('mongoose')
 
-const walletScheme = Schema({
+const walletScheme = mongoose.Schema({
     balance: {
         type: Number,
         required: true,
@@ -13,6 +13,6 @@ const walletScheme = Schema({
     },
     coin: String,
     chainId: Number,
-    transactions: [{type: Schema.Types.ObjectId, ref: 'Transaction'}]
+    transactions: [{type: mongoose.Schema.Types.ObjectId, ref: 'Transaction'}]
 })
 module.exports = mongoose.model('Wallet', walletScheme);

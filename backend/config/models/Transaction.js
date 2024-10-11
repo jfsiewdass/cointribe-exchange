@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+const mongoose = require('mongoose')
 
-const transactionScheme = Schema({
+const transactionScheme = mongoose.Schema({
     nature: {
         type: Number,
         required: true,
