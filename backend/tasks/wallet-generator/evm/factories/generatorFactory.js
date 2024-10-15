@@ -1,5 +1,5 @@
 const GeneratorFactoryContract = require('../contracts/abis/GeneratorFactoryContract')
-const { Web3 } = require('web3');
+const Web3 = require('web3');
 
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 

@@ -5,13 +5,14 @@ const {
     connectDB,
     getWeb3WssInstance
 } = require('./index')
+
 const { default: Web3 } = require('web3');
 
 const abi = [
     {
       "anonymous": false,
       "inputs": [],
-      "name": "DepositedOnMetaDapp",
+      "name": "DepositedOnCoinTribe",
       "type": "event"
     },
     {
@@ -30,21 +31,17 @@ const coin = 'AVAX'
 const transactionsQueue = new Queue('avax-transactions')
 
 connectDB.then(async () => {
-    // const web3 = getWeb3WssInstance(process.env.AVALANCHE_WSS)
-    const web3 = new Web3(process.env.AVALANCHE_WSS)
+    const web3 = getWeb3WssInstance(process.env.AVALANCHE_WSS)
     const options = {
-        fromBlock: 0,
-        toBlock: 'latest',
-        address: '0x4d56d7c17295bAe224270C4C6d76EdbB83d6879b',
-        //topics: [
-            //web3.utils.sha3('DepositedOnMetaDapp()')
-        //]
+        topics: [
+            web3.utils.sha3('DepositedOnCoinTribe()')
+        ]
     };
-    const contract = new web3.eth.Contract(abi, address);
+    // const contract = new web3.eth.Contract(abi, address);
 
-     const txcount = await web3.eth.getTransactionCount(address)
-    console.log('transactions', txcount)    
-    console.log('conectado a mongo...');
+    // const txcount = await web3.eth.getTransactionCount(address)
+    // console.log('transactions', txcount)    
+    // console.log('conectado a mongo...');
 
     // GET PAST LOGS
    
@@ -76,24 +73,21 @@ connectDB.then(async () => {
     // .on("error", (error) => {
     //     console.error("Event error:", error);
     // }); 
-    const transaction = contract.events.allEvents(options); 
+    // const transaction = contract.events.DepositedOnMetaDapp(options); 
 
-    transaction.on('connected', function (subId) {
-        console.log("conectado", subId);
-    })
-    transaction.on('data', function (error, result) {
-        console.log(error, result);
-    })
+    // transaction.on('connected', function (subId) {
+    //     console.log("conectado", subId);
+    // })
+    // transaction.on('data', (error, result) => {
+    //     console.log(error, result);
+    // })
     // SUBSCRIBE VERSION 1.0.0
-    // web3.eth.subscribe('logs', {
-    //     address: null, // Suscribir a todos los contratos
-    //     topics: [], // No filtrar por temas específicos
-    // }, async (error, result) => {
-    //     console.log(result, error);
+    web3.eth.subscribe('logs', options, async (error, result) => {
+        console.log(result, error);
        
-    // }).on('connected', (subscriptionId) => {
-    //     console.log(`Suscripción conectada con ID ${subscriptionId}`);
-    // });
+    }).on('connected', (subscriptionId) => {
+        console.log(`Suscripción conectada con ID ${subscriptionId}`);
+    });
 
     // ALL EVENTS
     // async function subscribe() {
