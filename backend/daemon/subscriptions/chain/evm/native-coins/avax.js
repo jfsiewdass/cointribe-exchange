@@ -37,81 +37,32 @@ connectDB.then(async () => {
             web3.utils.sha3('DepositedOnCoinTribe()')
         ]
     };
-    // const contract = new web3.eth.Contract(abi, address);
-
-    // const txcount = await web3.eth.getTransactionCount(address)
-    // console.log('transactions', txcount)    
-    // console.log('conectado a mongo...');
-
-    // GET PAST LOGS
-   
-    // web3.eth.getPastLogs(options)
-    // .then((logs) => {
-    //   console.log(logs);
-    // })
-    // .catch((error) => {
-    //   console.error('Error retrieving logs:', error);
-    // });
-
-
-    // GET PAST EVENTS
-    // web3.getPastEvents('allEvents',{  }, (error, event) => {
-    //     if (error) {
-    //         console.error("Error:", error);
-    //         return;
-    //     }
-    
-    //     console.log("New event received:");
-    //     console.log(event.returnValues);
-    // })
-    // .on("connected", () => {
-    //     console.log("Connected to the blockchain");
-    // })
-    // .on("changed", (event) => {
-    //     console.log("Event changed:", event.returnValues);
-    // })
-    // .on("error", (error) => {
-    //     console.error("Event error:", error);
-    // }); 
-    // const transaction = contract.events.DepositedOnMetaDapp(options); 
-
-    // transaction.on('connected', function (subId) {
-    //     console.log("conectado", subId);
-    // })
-    // transaction.on('data', (error, result) => {
-    //     console.log(error, result);
-    // })
-    // SUBSCRIBE VERSION 1.0.0
     web3.eth.subscribe('logs', options, async (error, result) => {
         console.log(result, error);
+        
+        if (!error) {
+            const wallets = await Wallet.find({chainId, coin})
+            if (wallets) {
+                const wallet = wallets.find(wallet => wallet.address === result.address)
+                if (wallet) {
+                    transactionsQueue.add('transaction', {
+                        walletAddress: wallet.address,
+                        transactionHash: result.transactionHash,
+                        chainId: chainId,
+                        coin: coin,
+                        uuid: uuidv4()
+                    }, {
+                        attempts: 2,
+                        backoff: {
+                            type: 'exponencial',
+                            delay: 5000
+                        }
+                    })
+                }
+            }
+        }
        
     }).on('connected', (subscriptionId) => {
         console.log(`Suscripción conectada con ID ${subscriptionId}`);
     });
-
-    // ALL EVENTS
-    // async function subscribe() {
-    //     console.log('subscribiendo...');
-        
-    //     const contract = new web3.eth.Contract(abi, address);
-    
-    //     // subscribe to the smart contract Transfer event
-    //     const subscription =  contract.events.allEvents({ topics: [] }, (error, event) => {
-    //         if (error) {
-    //             console.error("Error:", error);
-    //             return;
-    //         }
-        
-    //         console.log("New event received:");
-    //         console.log(event.returnValues);
-    //     })
-    //     .on("connected", () => {
-    //         console.log("Connected to the blockchain");
-    //     })
-        
-    //     console.log("End of routine");
-    
-    //     return subscription;
-    //   }
-    //   subscribe()
 })
