@@ -3,32 +3,16 @@ const {
     Wallet,
     uuidv4,
     connectDB,
-    getWeb3WssInstance
+    getWeb3WssInstance,
+    queueOptions
 } = require('./index')
 
-const { default: Web3 } = require('web3');
 
-const abi = [
-    {
-      "anonymous": false,
-      "inputs": [],
-      "name": "DepositedOnCoinTribe",
-      "type": "event"
-    },
-    {
-      "stateMutability": "payable",
-      "type": "fallback"
-    },
-    {
-      "stateMutability": "payable",
-      "type": "receive"
-    }
-]
-const address = '0x85513299341Fa1Aef01885dC2A5cB6d959C30A3d';
+// const address = '0x85513299341Fa1Aef01885dC2A5cB6d959C30A3d';
 const chainId = 43113
 const coin = 'AVAX'
 
-const transactionsQueue = new Queue('avax-transactions')
+const transactionsQueue = new Queue('avax-transactions', queueOptions)
 
 connectDB.then(async () => {
     const web3 = getWeb3WssInstance(process.env.AVALANCHE_WSS)
@@ -38,8 +22,7 @@ connectDB.then(async () => {
         ]
     };
     web3.eth.subscribe('logs', options, async (error, result) => {
-        console.log(result, error);
-        
+        // console.log(result, error);
         if (!error) {
             const wallets = await Wallet.find({chainId, coin})
             if (wallets) {
@@ -52,12 +35,12 @@ connectDB.then(async () => {
                         coin: coin,
                         uuid: uuidv4()
                     }, {
-                        attempts: 2,
+                        attempts: 2,                      // number of attempts
                         backoff: {
-                            type: 'exponencial',
-                            delay: 5000
+                          type: 'fixed',                  // type of backoff
+                          delay: 500                     // delay between attempts
                         }
-                    })
+                      })
                 }
             }
         }
