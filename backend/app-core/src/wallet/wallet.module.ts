@@ -11,11 +11,13 @@ import { HashService } from 'src/user/hash.service';
 import { AuthService } from 'src/auth/auth.service';
 import { BullModule } from '@nestjs/bullmq';
 import { default as QueueType} from './queue/types.queue';
+import { Transaction, TransactionSchema } from 'src/transaction/schemas/transaction.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema }, 
       { name: Wallet.name, schema: WalletSchema },
+      { name: Transaction.name, schema: TransactionSchema },
       { name: WalletContract.name, schema: WalletContractSchema },
     ]),
     BullModule.registerQueue({

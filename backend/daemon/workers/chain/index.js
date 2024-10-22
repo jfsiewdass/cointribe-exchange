@@ -3,7 +3,7 @@ require('dotenv').config({ path: `${appRoot}/config/.env` })
 const { Worker } = require('bullmq')
 const createTransaction = require(`${appRoot}/jobs/deposits/transaction`)
 const processDeposit = require(`${appRoot}/jobs/deposits/deposit`)
-// const processWithdraw = require(`${appRoot}/jobs/withdraws/withdraw`)
+const processWithdraw = require(`${appRoot}/jobs/withdraws/withdraw`)
 const connectDB = require(`${appRoot}/config/db/getMongoose`);
 const Redis = require('ioredis');
 // Create a Redis connection
@@ -17,5 +17,5 @@ module.exports = {
     connectDB,
     createTransaction,
     processDeposit,
-    // processWithdraw
+    processWithdraw
 }

@@ -1,0 +1,20 @@
+{
+    "apps": [
+        {
+            "name": "AVAX Broadcast NODE",
+            "script": "./daemon/subscriptions/chain/evm/native-coins/avax.js"
+        },
+        {
+            "name": "App Withdraw Broadcast NODE",
+            "script": "./daemon/subscriptions/app/withdraws.js"
+        },
+        {
+            "name": "Avalanche Worker NODE",
+            "script": "./daemon/workers/chain/avalanche.js"
+        },
+        {
+            "name": "App Withdraw Worker NODE",
+            "script": "./daemon/workers/local/withdrawRequests.js"
+        }
+    ]
+}

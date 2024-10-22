@@ -1,7 +1,7 @@
 const appRoot = require('app-root-path')
 const { Types } = require('mongoose');
 const Web3 = require('web3')
-// const { sendDepositEmail } = require('../notifications/mailService')
+const { sendDepositEmail } = require('../notifications/mailService')
 
 const Transaction = require(`${appRoot}/config/models/Transaction`)
 const Wallet = require(`${appRoot}/config/models/Wallet`)
@@ -33,9 +33,6 @@ const _updateTransactionState = async (tId, status, value, confirmations) => {
     }
 
     await transaction.save();
-    // await Transaction.updateOne({ _id: Types.ObjectId(tId) }, {
-    //     $set: upsert
-    // })
 }
 
 const _deposit = async (transactionId, chainId, coin, address, value) => {
@@ -57,7 +54,7 @@ const _deposit = async (transactionId, chainId, coin, address, value) => {
         });
         console.log(user);
         
-        // sendDepositEmail(value, coin, user.email)
+        sendDepositEmail(value, coin, user.email)
         return 'deposit'
     } else {
         await _updateTransactionState(transactionId, 4) // 4 status CANCELADO

@@ -16,7 +16,7 @@ connectDB.then(async () => {
     const generatorFactory = new GeneratorFactory(rpc, [g_address_pk])
     while (amount > 0) {
         console.log('Generating wallet... ', 'Remain: ', amount - 1)
-        console.log(rpc, g_address, g_address_pk);
+        // console.log(rpc, g_address, g_address_pk);
         
         const res = await generatorFactory.generate(g_address)
         console.log('Generat factory', res)

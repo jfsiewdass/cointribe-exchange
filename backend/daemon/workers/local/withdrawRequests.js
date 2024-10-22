@@ -1,16 +1,15 @@
-const { Worker } = require('bullmq');
-const redisClient = require('../config');
+const appRoot = require('app-root-path')
+require('dotenv').config({ path: `${appRoot}/config/.env` })
+const { redis, connectDB, Worker, sendWithdraw } = require('../config')
 
-const worker = new Worker('withdraw-requests', async (job) => {
-    console.log('Working...');
-    console.log(job.data);
-}, {
-    connection: redisClient
-});
-
-worker.on('completed', (job) => {
-    console.log(`Job ${job.id} completed`);
-});
-worker.on('error', (err) => {
-    console.error('Worker error:', err);
-});
+connectDB.then(() => {
+    new Worker('withdraw-requests', async (job) => {
+        try{
+            console.log('Working...');
+            console.log(job.data);
+            return await sendWithdraw(job.data)
+        } catch(error) {
+            job.moveToNextAttempt();
+        }
+    }, { connection: redis });
+})

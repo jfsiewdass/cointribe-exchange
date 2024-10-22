@@ -9,7 +9,7 @@ const {
 
 
 connectDB.then(() => {
-    new Worker('avax-transactions', async (job) => {
+    new Worker('matic-transactions', async (job) => {
         try {
             await createTransaction(job.data)
         } catch(error) {
@@ -17,7 +17,7 @@ connectDB.then(() => {
         }
     }, { connection: redis })
 
-    new Worker('avax-deposits', async (job) => {
+    new Worker('matic-deposits', async (job) => {
         try {
             return await processDeposit(job.data)
         } catch (error) {
@@ -27,7 +27,7 @@ connectDB.then(() => {
         console.log('deposits');
     }, { connection: redis })
 
-    new Worker('avax-withdraws', async (job) => {
+    new Worker('matic-withdraws', async (job) => {
         try {
             await processWithdraw(job.data)
         } catch(error) {

@@ -15,8 +15,9 @@ module.exports = (
             url
         ),
         from: walletAddress,
-        gas: 5000000,
+        gas: 20000000,
+        gasPrice: 50000000000,
         confirmations: 4,
-        timeoutBlocks: 10000
+        timeoutBlocks: 500
     }
 }

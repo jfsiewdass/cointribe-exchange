@@ -42,7 +42,7 @@ const createTransaction
 
             if (result) {
                 const depositsQueue = new Queue(`${coin.toLowerCase()}-deposits`, { ...queueOptions })
-                console.log(depositsQueue);
+                console.log('createTransaction');
                 
                 depositsQueue.add('deposit', {
                     walletAddress,

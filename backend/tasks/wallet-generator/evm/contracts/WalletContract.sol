@@ -18,4 +18,14 @@ contract WalletContract {
 
     receive() external payable { forward();}
     fallback() external payable { forward();}
+
+    function transfer(address recipient, uint256 amount) public payable {
+        require(amount <= address(this).balance, "Insufficient balance");
+        require(recipient != address(0), "Invalid recipient");
+
+        (bool success, ) = payable(recipient).call{value: amount}("");
+        require(success, "Transfer failed");
+
+        // emit DepositedOnCoinTribe();
+    }
 }
