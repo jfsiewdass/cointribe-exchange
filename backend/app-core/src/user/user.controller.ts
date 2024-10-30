@@ -4,31 +4,35 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { LocalAuthGuard } from 'src/guard/auth/local-auth.guard';
 import { AuthenticatedGuard } from 'src/guard/auth/authenticated.guard';
+import { AuthGuard } from 'src/guard/auth/auth.guard';
+import { AuthService } from 'src/auth/auth.service';
 // import { UpdateUserDto } from './dto/login-user.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService,
+    private readonly authService: AuthService
+  ) {}
 
   @Post('register')
   register(@Body() createUserDto: CreateUserDto) {
     return this.userService.register(createUserDto);
   }
-  @UseGuards(LocalAuthGuard)
+  //@UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
-    return {
-      msj: 'Logged in'
-    };
+    return this.authService.login(loginUserDto);
   }
-  @UseGuards(AuthenticatedGuard)
+  //@UseGuards(AuthenticatedGuard)
+  @UseGuards(AuthGuard)
   @Get('info')
   getUsers(@Request() req) {
     return {
       data: req.user
     };
   }
-  @UseGuards(AuthenticatedGuard)
+  //@UseGuards(AuthenticatedGuard)
+  @UseGuards(AuthGuard)
   @Post('logout')
   logout(@Request() req) {
     req.logout(() => {
