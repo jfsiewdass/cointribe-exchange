@@ -12,16 +12,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: [process.env.FRONT_ORIGIN],
-    credentials: true
+    credentials: false
   })
-  app.setGlobalPrefix('secure/api');
+  app.setGlobalPrefix('api');
   
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true
-    })
-  );
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true
+  //   })
+  // );
   //const RedisStore =  RedisStore(session);
   const redisClient = new Redis({
     host: process.env.REDIS_HOST,

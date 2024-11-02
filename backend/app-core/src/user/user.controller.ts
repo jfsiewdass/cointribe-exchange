@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Headers } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -11,7 +11,7 @@ import { AuthService } from 'src/auth/auth.service';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {}
 
   @Post('register')
@@ -33,11 +33,10 @@ export class UserController {
   }
   //@UseGuards(AuthenticatedGuard)
   @UseGuards(AuthGuard)
-  @Post('logout')
-  logout(@Request() req) {
-    req.logout(() => {
-      return;
-    })
+  @Delete('logout')
+  logout(@Headers('Authorization') auth: string) {
+    const user = this.authService.decode(auth);
+    return this.authService.logout(user);
   }
   @Get(':id')
   findOne(@Param('id') id: string) {

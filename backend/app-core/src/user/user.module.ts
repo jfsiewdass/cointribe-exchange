@@ -4,16 +4,15 @@ import { UserController } from './user.controller';
 import { HashService } from './hash.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
-import { AuthModule } from 'src/auth/auth.module';
 import { AuthService } from 'src/auth/auth.service';
-import { JwtModule } from '@nestjs/jwt';
+import { Wallet, WalletSchema } from 'src/wallet/schemas/wallet.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{
-      name: User.name,
-      schema: UserSchema
-    }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema }, 
+      { name: Wallet.name, schema: WalletSchema },
+  ])
   ],
   controllers: [UserController],
   providers: [

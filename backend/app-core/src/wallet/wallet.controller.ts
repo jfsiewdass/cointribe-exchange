@@ -1,14 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, Headers } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { QueryDto } from './dto/query.dto';
 import { AuthenticatedGuard } from 'src/guard/auth/authenticated.guard';
 import { WithdrawDto } from './dto/withdraw.dto';
 import { AuthGuard } from 'src/guard/auth/auth.guard';
+import { AuthService } from 'src/auth/auth.service';
+import { AuthDto } from 'src/auth/dto/auth-dto';
 
 @Controller('wallet')
 export class WalletController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(
+    private readonly walletService: WalletService,
+    private readonly authService: AuthService
+  ) {}
 
   //@UseGuards(AuthenticatedGuard)
 @UseGuards(AuthGuard)
@@ -21,8 +26,9 @@ export class WalletController {
   //@UseGuards(AuthenticatedGuard)
 @UseGuards(AuthGuard)
   @Get('info')
-  wallet(@Request() req, @Query() queryDto: QueryDto) {
-    return this.walletService.getWallet(req.user.email, queryDto);
+  wallet(@Query() queryDto: QueryDto, @Headers('Authorization') auth: string) {
+    const user: any = this.authService.decode(auth);
+    return this.walletService.getWallet(user.email, queryDto);
   }
 
   //@UseGuards(AuthenticatedGuard)

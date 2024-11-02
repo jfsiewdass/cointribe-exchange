@@ -9,6 +9,7 @@ import { SessionSerializer } from "./strategy/session.serialize";
 import { HashService } from "src/user/hash.service";
 import { UserService } from "src/user/user.service";
 import { JwtModule } from "@nestjs/jwt";
+import { Wallet, WalletSchema } from "src/wallet/schemas/wallet.schema";
 
 @Module({
     imports: [
@@ -19,10 +20,10 @@ import { JwtModule } from "@nestjs/jwt";
             secret: 'prueba',
             signOptions: { expiresIn: "1d" },
         }),
-        MongooseModule.forFeature([{
-            name: User.name,
-            schema: UserSchema
-        }])
+        MongooseModule.forFeature([
+            { name: User.name, schema: UserSchema }, 
+            { name: Wallet.name, schema: WalletSchema },
+        ])
     ],
     providers: [
         AuthService,
