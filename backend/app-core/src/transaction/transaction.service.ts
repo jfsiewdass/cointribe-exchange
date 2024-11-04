@@ -5,6 +5,9 @@ import { Wallet, WalletDocument } from '../wallet/schemas/wallet.schema';
 import { Transaction, TransactionDocument } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { QueryDto } from './dto/query.dto';
+import { GenericResponse } from 'src/common/interfaces/generic-response';
+import { StatusEnum } from 'src/common/enums/status.enum';
+import { TxEnum } from 'src/common/enums/transaction-type.enum';
 
 @Injectable()
 export class TransactionService {
@@ -32,19 +35,18 @@ export class TransactionService {
       { $project: { _id: 0 } },
       {
         $lookup: {
-          from: "wallets",
-          localField: "wallets",
+          from: 'wallets',
+          localField: 'wallets',
           foreignField: "_id",
-          as: "walletsData",
+          as: 'walletsData',
           pipeline: [
             {
-              $match: { coin: queryDto.coin }
+              $match: { coin: 'AVAX' }
             }
           ]
         }
       }
     ]).exec();
-
     if (data && data.length > 0) {
       let wallet = data.find(w => w.walletsData.length > 0);
       if (wallet) {
@@ -64,17 +66,27 @@ export class TransactionService {
         ]).exec();
 
         if (data && data.length > 0) {
-          return data.map(transaction => {
+          const transactions = data.map(transaction => {
             return {
-              nature: transaction.transactionData[0].nature,
+              typeId: transaction.transactionData[0].nature,
+              type: TxEnum[transaction.transactionData[0].nature],
+              currency: 'USDT',
               txHash: transaction.transactionData[0].txHash,
               transactionId: transaction.transactionData[0]._id,
               created_at: transaction.transactionData[0].created_at,
               confirmations: transaction.transactionData[0].confirmations,
-              status: transaction.transactionData[0].status,
+              statusId: transaction.transactionData[0].status,
+              status: StatusEnum[transaction.transactionData[0].status],
               amount: transaction.transactionData[0].amount
             }
           })
+          const response: GenericResponse<any> = {
+            status: 'STATUS',
+            statusCode: 200,
+            data: transactions,
+            message: 'Logged success'
+          }
+          return response;
         }
       }
     }

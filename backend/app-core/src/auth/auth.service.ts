@@ -61,7 +61,6 @@ export class AuthService {
     }
     const wallet = await this.getWallet(user.email)
     const payload = { email: user.email, firstName: user.firstName, lastName: user.lastName, wallet: wallet };
-    console.log(wallet);
     
     const token = await this.jwtService.signAsync(payload);
     const AUTH: AuthDto = {

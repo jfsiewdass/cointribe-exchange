@@ -1,21 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, Headers } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { QueryDto } from './dto/query.dto';
 import { AuthenticatedGuard } from 'src/guard/auth/authenticated.guard';
 import { AuthGuard } from 'src/guard/auth/auth.guard';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('transaction')
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly authService: AuthService
+  ) {}
 
   //@UseGuards(AuthenticatedGuard)
 @UseGuards(AuthGuard)
   @Get('all')
-  transactions(
-    @Request() req,
-    @Query() queryDto: QueryDto) {
+  transactions(@Query() queryDto: QueryDto, @Headers('Authorization') auth: string) {
+      const user: any = this.authService.decode(auth);
     return this.transactionService.getTransactions(
-      req.user.email,
+      user.email,
       queryDto
     );
   }
