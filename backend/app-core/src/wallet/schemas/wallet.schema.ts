@@ -13,6 +13,18 @@ export class Wallet {
     balance: number;
 
     @Prop({
+        required: false,
+        default: 0
+    })
+    earn: number;
+    
+    @Prop({
+        required: false,
+        default: 0
+    })
+    game: number;
+
+    @Prop({
         required: true,
         index: true,
     })

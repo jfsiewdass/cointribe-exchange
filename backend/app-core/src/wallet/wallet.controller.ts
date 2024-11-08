@@ -7,6 +7,7 @@ import { WithdrawDto } from './dto/withdraw.dto';
 import { AuthGuard } from 'src/guard/auth/auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthDto } from 'src/auth/dto/auth-dto';
+import { TransferDto } from './dto/transfer.dto';
 
 @Controller('wallet')
 export class WalletController {
@@ -16,7 +17,7 @@ export class WalletController {
   ) {}
 
   //@UseGuards(AuthenticatedGuard)
-@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Post('create')
   createWallet(@Request() req, @Body() createWalletDto: CreateWalletDto) {
     createWalletDto.email = req.user.email;
@@ -24,7 +25,7 @@ export class WalletController {
   }
 
   //@UseGuards(AuthenticatedGuard)
-@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get('info')
   wallet(@Query() queryDto: QueryDto, @Headers('Authorization') auth: string) {
     const user: any = this.authService.decode(auth);
@@ -32,14 +33,14 @@ export class WalletController {
   }
 
   //@UseGuards(AuthenticatedGuard)
-@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get('all')
   wallets(@Request() req) {
     return this.walletService.getWallets(req.user.email);
   }
 
   //@UseGuards(AuthenticatedGuard)
-@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Post('withdraw')
   withdraw(
     @Request() req,
@@ -47,5 +48,13 @@ export class WalletController {
   ) {
     withdrawDto.email = req.user.email;
     return this.walletService.withdraw(withdrawDto);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('transfer')
+  transfer(@Body() transferDto: TransferDto, @Headers('Authorization') auth: string) {
+    const user: any = this.authService.decode(auth);
+    transferDto.email = user.email
+    return this.walletService.transfer(transferDto);
   }
 }

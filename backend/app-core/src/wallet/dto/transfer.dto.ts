@@ -7,7 +7,7 @@ import {
     IsString
 } from 'class-validator';
 
-export class WithdrawDto {
+export class TransferDto {
     @IsString()
     @Transform((coin) => coin.value.toUpperCase())
     coin: string;
@@ -16,11 +16,10 @@ export class WithdrawDto {
     amount: number;
 
     @IsString()
-    to: string;
+    to: number;
 
-    @IsOptional()
     @IsString()
-    from: string;
+    from: number;
 
     @IsOptional()
     @IsString()

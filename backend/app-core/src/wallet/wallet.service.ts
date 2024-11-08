@@ -13,6 +13,11 @@ import { default as QueueType} from './queue/types.queue';
 import { Queue } from 'bullmq';
 import { uuid } from 'uuidv4';
 import { Transaction, TransactionDocument } from 'src/transaction/schemas/transaction.schema';
+import { TransferDto } from './dto/transfer.dto';
+import { GenericResponse } from 'src/common/interfaces/generic-response';
+import { TxEnum } from 'src/common/enums/transaction-type.enum';
+import { getWalletType, WalletType } from 'src/common/enums/wallet-type.enum';
+import { StatusEnum } from 'src/common/enums/status.enum';
 @Injectable()
 export class WalletService {
   constructor(
@@ -149,6 +154,8 @@ export class WalletService {
         let walletsData = wallet.walletsData[0];
         return {
           balance: walletsData.balance,
+          earn: walletsData.earn,
+          game: walletsData.game,
           address: walletsData.address,
           chainId: walletsData.chainId,
           coin: walletsData.coin,
@@ -230,4 +237,113 @@ export class WalletService {
       }
     }
   }
-}
+  async transfer(transferDto: TransferDto) {
+
+    const response: GenericResponse<any> = {
+      status: 'STATUS',
+      statusCode: 200,
+      data: null,
+      message: ''
+    }
+    const data = await this.userModel.aggregate([
+      { $match: { email: transferDto.email } },
+      { $unwind: '$wallets' },
+      { $project: { _id: 0 } },
+      {
+        $lookup: {
+          from: "wallets",
+          localField: "wallets",
+          foreignField: "_id",
+          as: "walletsData",
+          pipeline: [
+            {
+              $match: { coin: transferDto.coin }
+            }
+          ]
+        }
+      }
+    ]).exec();
+    console.log(data);
+
+    if (data && data.length > 0) {
+      let wallet = data.find(w => w.walletsData.length > 0)
+      if (wallet) {
+        wallet = wallet.walletsData[0];
+        const data = await this.walletModel.findOne(
+          { _id: new Types.ObjectId(wallet._id) },
+          { _id: 0, transactions: 0, __v: 0 }
+        ).exec();
+
+        const updateAmount = {
+          balance: data.balance,
+          earn: data.earn,
+          game: data.game,
+        }
+
+        if (transferDto.from == WalletType.SPOT && updateAmount.balance >= transferDto.amount) {
+          updateAmount.balance = -1 * transferDto.amount;
+        } else if (transferDto.from == WalletType.EARN && updateAmount.earn >= transferDto.amount) {
+          updateAmount.earn = -1 * transferDto.amount
+        } else if (transferDto.from == WalletType.GAME && updateAmount.game >= transferDto.amount) {
+          updateAmount.game = -1 * transferDto.amount
+        } else {
+          response.message = 'Insuficient balance'
+          response.statusCode = 500
+          response.status = 'error'
+
+          return response;
+        }
+
+        if (transferDto.to == WalletType.SPOT) updateAmount.balance = updateAmount.balance + transferDto.amount
+        if (transferDto.to == WalletType.EARN) updateAmount.earn = updateAmount.earn + transferDto.amount
+        if (transferDto.to == WalletType.GAME) updateAmount.game = updateAmount.game + transferDto.amount
+
+        
+        if (data) {
+          const transaction = new this.transactionModel({
+            nature: TxEnum.TRANSFER,
+            amount: -1 * transferDto.amount,
+            created_at: Date.now(),
+            status: StatusEnum.PROCESSED,
+            txHash: uuid(),
+            from: getWalletType(transferDto.from),
+            to: getWalletType(transferDto.to),
+          });
+
+          const saved = await transaction.save();
+
+          if (saved) {
+            
+            
+            const result = await this.walletModel.updateOne(
+              { _id: new Types.ObjectId(wallet._id) },
+              {
+                $push: { transactions: transaction._id },
+                $inc: updateAmount
+              });
+
+            if (result) {
+
+              response.message = 'Transferencia existosa'
+              response.statusCode = 200
+              response.status = 'success'
+              response.data = updateAmount
+    
+              return response
+            }
+          }
+        } else {
+          response.message = 'Transfer error'
+          response.statusCode = 500
+          response.status = 'error'
+
+          return response
+        }
+      }
+    }
+
+
+   
+    return response
+  }
+} 

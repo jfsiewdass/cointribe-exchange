@@ -23,6 +23,9 @@ export class Transaction {
     @Prop()
     to: string;
 
+    @Prop()
+    from: string;
+
     @Prop({
         default: 0
     })

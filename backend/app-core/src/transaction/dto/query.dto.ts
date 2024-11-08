@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
 import {
     IsMongoId,
+    IsNumber,
     IsOptional,
     IsString
 } from 'class-validator';
@@ -15,4 +16,10 @@ export class QueryDto {
     @IsString()
     @IsMongoId()
     transactionId: string;
+
+    @IsString()
+    page: number;
+
+    @IsString()
+    limit: number;
 }

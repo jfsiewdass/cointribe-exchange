@@ -8,6 +8,7 @@ import { QueryDto } from './dto/query.dto';
 import { GenericResponse } from 'src/common/interfaces/generic-response';
 import { StatusEnum } from 'src/common/enums/status.enum';
 import { TxEnum } from 'src/common/enums/transaction-type.enum';
+import { query } from 'express';
 
 @Injectable()
 export class TransactionService {
@@ -29,6 +30,10 @@ export class TransactionService {
   }
 
   async getTransactions(email: string, queryDto: QueryDto) {
+    // const { page, limit } = queryDto
+    
+    
+    
     const data = await this.userModel.aggregate([
       { $match: { email } },
       { $unwind: '$wallets' },
@@ -51,10 +56,11 @@ export class TransactionService {
       let wallet = data.find(w => w.walletsData.length > 0);
       if (wallet) {
         wallet = wallet.walletsData[0];
+        const page = parseInt(queryDto.page.toString()) || 1;
+        const limit = parseInt(queryDto.limit.toString()) || 10;
+
         const data = await this.walletModel.aggregate([
           { $match: { _id: new Types.ObjectId(wallet._id) } },
-          { $unwind: '$transactions' },
-          { $project: { _id: 0, transactions: 1 } },
           {
             $lookup: {
               from: "transactions",
@@ -62,23 +68,38 @@ export class TransactionService {
               foreignField: "_id",
               as: "transactionData"
             }
+          },
+          {
+            $project: {
+              _id: 0,
+              transactionData: {
+                $slice: [
+                  "$transactionData",
+                  (page - 1) * limit,
+                  limit
+                ]
+              }
+            }
           }
         ]).exec();
-
+        
         if (data && data.length > 0) {
-          const transactions = data.map(transaction => {
-            return {
-              typeId: transaction.transactionData[0].nature,
-              type: TxEnum[transaction.transactionData[0].nature],
-              currency: 'USDT',
-              txHash: transaction.transactionData[0].txHash,
-              transactionId: transaction.transactionData[0]._id,
-              created_at: transaction.transactionData[0].created_at,
-              confirmations: transaction.transactionData[0].confirmations,
-              statusId: transaction.transactionData[0].status,
-              status: StatusEnum[transaction.transactionData[0].status],
-              amount: transaction.transactionData[0].amount
-            }
+          
+          const transactions = data[0].transactionData.map(transaction => {
+
+              return  {
+                typeId: transaction.nature,
+                type: TxEnum[transaction.nature],
+                currency: 'USDT',
+                txHash: transaction.txHash,
+                transactionId: transaction._id,
+                created_at: transaction.created_at,
+                confirmations: transaction.confirmations,
+                statusId: transaction.status,
+                status: StatusEnum[transaction.status],
+                amount: transaction.amount
+              }
+            
           })
           const response: GenericResponse<any> = {
             status: 'STATUS',
@@ -88,6 +109,13 @@ export class TransactionService {
           }
           return response;
         }
+        const response: GenericResponse<any> = {
+          status: 'STATUS',
+          statusCode: 200,
+          data: [],
+          message: 'Logged success'
+        }
+        return response;
       }
     }
   }
