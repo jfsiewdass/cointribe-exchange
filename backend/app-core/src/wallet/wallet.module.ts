@@ -12,6 +12,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { BullModule } from '@nestjs/bullmq';
 import { default as QueueType} from './queue/types.queue';
 import { Transaction, TransactionSchema } from 'src/transaction/schemas/transaction.schema';
+import { TokenService } from 'src/auth/token.service';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -30,7 +31,7 @@ import { Transaction, TransactionSchema } from 'src/transaction/schemas/transact
     WalletService, 
     UserService,
     HashService,
-    AuthService
+    TokenService
   ],
 })
 export class WalletModule {}

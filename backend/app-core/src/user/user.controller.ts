@@ -1,17 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Headers, Req, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { LocalAuthGuard } from 'src/guard/auth/local-auth.guard';
 import { AuthenticatedGuard } from 'src/guard/auth/authenticated.guard';
-import { AuthGuard } from 'src/guard/auth/auth.guard';
+import { AuthGuard as Auth } from 'src/guard/auth/auth.guard';
 import { AuthService } from 'src/auth/auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { TokenService } from 'src/auth/token.service';
 // import { UpdateUserDto } from './dto/login-user.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService,
-    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
   ) {}
 
   @Post('register')
@@ -21,10 +23,10 @@ export class UserController {
   //@UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.login(loginUserDto);
+    return this.userService.login(loginUserDto);
   }
   //@UseGuards(AuthenticatedGuard)
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
   @Get('info')
   getUsers(@Request() req) {
     return {
@@ -32,11 +34,11 @@ export class UserController {
     };
   }
   //@UseGuards(AuthenticatedGuard)
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
   @Delete('logout')
   logout(@Headers('Authorization') auth: string) {
-    const user = this.authService.decode(auth);
-    return this.authService.logout(user);
+    const user = this.tokenService.decode(auth);
+    return this.userService.logout(user);
   }
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -52,4 +54,16 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
+
+  // @Get('google')
+  // @UseGuards(AuthGuard('google'))
+  // async googleLogin(@Request() req) {
+  //   return req.user;
+  // }
+
+  // @Get('auth/google/callback')
+  // @UseGuards(AuthGuard('google'))
+  // async callback(@Req() req, @Res() res) {
+  //   return this.authService.googleLogin(req.user);
+  // }
 }

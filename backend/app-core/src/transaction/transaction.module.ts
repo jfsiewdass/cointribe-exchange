@@ -9,22 +9,31 @@ import { Wallet, WalletSchema } from '../wallet/schemas/wallet.schema';
 import { AuthService } from '../auth/auth.service';
 import { UserService } from '../user/user.service';
 import { HashService } from '../user/hash.service';
-
+import { TokenService } from 'src/auth/token.service';
+import { WalletService } from 'src/wallet/wallet.service';
+import { WalletContract, WalletContractSchema } from 'src/wallet/schemas/wallet-contract.schema';
+import { BullModule } from '@nestjs/bullmq';
+import { default as QueueType} from '../wallet/queue/types.queue';
 @Module({
   imports: [
     UserModule,
     MongooseModule.forFeature([
-      { name: Transaction.name, schema: TransactionSchema },
-      { name: User.name, schema: UserSchema },
+      { name: User.name, schema: UserSchema }, 
       { name: Wallet.name, schema: WalletSchema },
-    ])
+      { name: Transaction.name, schema: TransactionSchema },
+      { name: WalletContract.name, schema: WalletContractSchema },
+    ]),
+    BullModule.registerQueue({
+      name: QueueType.WITHDRAW_REQUEST
+    }),
   ],
   controllers: [TransactionController],
   providers: [
     TransactionService,
-    AuthService,
+    TokenService,
     UserService,
-    HashService
+    HashService,
+    WalletService
   ]
 })
 export class TransactionModule {}

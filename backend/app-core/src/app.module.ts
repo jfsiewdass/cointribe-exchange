@@ -23,9 +23,9 @@ import { BullModule } from '@nestjs/bullmq';
         port: parseInt(process.env.REDIS_PORT),
       }
     }),
+    AuthModule,
     UserModule,
     WalletModule,
-    AuthModule,
     TransactionModule
   ],
   providers: [AppService],

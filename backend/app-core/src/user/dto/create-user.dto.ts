@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
     @IsString()
@@ -19,4 +19,7 @@ export class CreateUserDto {
         message: 'La contraseña debe contener mayúsculas, minúsculas y números'
     })
     password: string;
+
+    @IsBoolean()
+    loggedInByGoogle: boolean
 }

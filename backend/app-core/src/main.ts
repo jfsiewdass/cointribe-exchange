@@ -9,11 +9,22 @@ import * as passport from 'passport';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+  });
+  // const whitelist = [
+  //   'http://localhost:4200',
+  //   'http://localhost:6003',
+  //   'http://127.0.0.1:4200',
+  //   'http://127.0.0.1:6003',
+  // ];
   app.enableCors({
-    origin: [process.env.FRONT_ORIGIN, 'http://localhost:4300'],
-    credentials: false
-  })
+    origin: ['http://localhost:4200', 'http://localhost:6003'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  });
+
   app.setGlobalPrefix('api');
   
   // app.useGlobalPipes(

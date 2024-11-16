@@ -23,6 +23,9 @@ export class User {
 
     @Prop({type: [{ type: Types.ObjectId, ref: 'Wallet'}]})
     wallets: [Wallet];
+
+    @Prop({default: false})
+    loggedInByGoogle: boolean
 }
 
 

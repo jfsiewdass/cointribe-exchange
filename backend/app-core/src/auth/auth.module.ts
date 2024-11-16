@@ -10,11 +10,18 @@ import { HashService } from "src/user/hash.service";
 import { UserService } from "src/user/user.service";
 import { JwtModule } from "@nestjs/jwt";
 import { Wallet, WalletSchema } from "src/wallet/schemas/wallet.schema";
-
+import { GoogleStrategy } from "./strategy/google.strategy";
+import { AuthController } from "./auth.controller";
+import { WalletService } from "src/wallet/wallet.service";
+import { WalletContract, WalletContractSchema } from "src/wallet/schemas/wallet-contract.schema";
+import { TokenService } from "./token.service";
+import { BullModule } from '@nestjs/bullmq';
+import { default as QueueType} from '../wallet/queue/types.queue';
+import { Transaction, TransactionSchema } from "src/transaction/schemas/transaction.schema";
 @Module({
     imports: [
         UserModule,
-        //PassportModule.register({ session: true }),
+        PassportModule.register({ defaultStrategy: 'google' }),
         JwtModule.register({
             global: true,
             secret: 'prueba',
@@ -23,13 +30,22 @@ import { Wallet, WalletSchema } from "src/wallet/schemas/wallet.schema";
         MongooseModule.forFeature([
             { name: User.name, schema: UserSchema }, 
             { name: Wallet.name, schema: WalletSchema },
-        ])
+            { name: Transaction.name, schema: TransactionSchema },
+            { name: WalletContract.name, schema: WalletContractSchema },
+          ]),
+        BullModule.registerQueue({
+            name: QueueType.WITHDRAW_REQUEST
+          }),
     ],
+    controllers: [AuthController],
     providers: [
         AuthService,
         LocalStrategy,
+        GoogleStrategy,
         SessionSerializer,
         HashService,
+        WalletService,
+        TokenService,
         UserService
     ]
 })

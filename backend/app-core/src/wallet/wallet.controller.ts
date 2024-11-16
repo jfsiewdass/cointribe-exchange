@@ -2,25 +2,23 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, 
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { QueryDto } from './dto/query.dto';
-import { AuthenticatedGuard } from 'src/guard/auth/authenticated.guard';
 import { WithdrawDto } from './dto/withdraw.dto';
 import { AuthGuard } from 'src/guard/auth/auth.guard';
-import { AuthService } from 'src/auth/auth.service';
-import { AuthDto } from 'src/auth/dto/auth-dto';
 import { TransferDto } from './dto/transfer.dto';
+import { TokenService } from 'src/auth/token.service';
 
 @Controller('wallet')
 export class WalletController {
   constructor(
     private readonly walletService: WalletService,
-    private readonly authService: AuthService
+    private readonly tokenService: TokenService
   ) {}
 
   //@UseGuards(AuthenticatedGuard)
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Post('create')
   createWallet(@Request() req, @Body() createWalletDto: CreateWalletDto) {
-    createWalletDto.email = req.user.email;
+    //createWalletDto.email = req.user.email;
     return this.walletService.create(createWalletDto);
   }
 
@@ -28,7 +26,7 @@ export class WalletController {
   @UseGuards(AuthGuard)
   @Get('info')
   wallet(@Query() queryDto: QueryDto, @Headers('Authorization') auth: string) {
-    const user: any = this.authService.decode(auth);
+    const user: any = this.tokenService.decode(auth);
     return this.walletService.getWallet(user.email, queryDto);
   }
 
@@ -53,7 +51,7 @@ export class WalletController {
   @UseGuards(AuthGuard)
   @Post('transfer')
   transfer(@Body() transferDto: TransferDto, @Headers('Authorization') auth: string) {
-    const user: any = this.authService.decode(auth);
+    const user: any = this.tokenService.decode(auth);
     transferDto.email = user.email
     return this.walletService.transfer(transferDto);
   }
