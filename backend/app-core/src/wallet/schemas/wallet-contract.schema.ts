@@ -19,6 +19,7 @@ export class WalletContract {
 
     @Prop()
     chainId: number;
+    
 }
 
 export const WalletContractSchema = SchemaFactory.createForClass(WalletContract); 

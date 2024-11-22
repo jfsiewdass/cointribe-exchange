@@ -8,6 +8,8 @@ import { WalletModule } from './wallet/wallet.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { AuthModule } from './auth/auth.module';
 import { BullModule } from '@nestjs/bullmq';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { DiceModule } from './games/dice/dice.module';
 
 @Module({
   imports: [
@@ -23,10 +25,22 @@ import { BullModule } from '@nestjs/bullmq';
         port: parseInt(process.env.REDIS_PORT),
       }
     }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: 587,
+        secure: false, // use SSL
+        auth: {
+          user: process.env.EMAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      },
+    }),
     AuthModule,
     UserModule,
     WalletModule,
-    TransactionModule
+    TransactionModule,
+    DiceModule
   ],
   providers: [AppService],
 })

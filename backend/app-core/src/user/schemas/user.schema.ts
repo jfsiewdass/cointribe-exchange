@@ -21,11 +21,18 @@ export class User {
     @Prop({ required: true })
     password: string;
 
+    @Prop({ default: 1 })
+    rol: number;
+
+
     @Prop({type: [{ type: Types.ObjectId, ref: 'Wallet'}]})
     wallets: [Wallet];
 
     @Prop({default: false})
     loggedInByGoogle: boolean
+
+    @Prop({default: null})
+    emailVerifiedAt: Date | null;
 }
 
 

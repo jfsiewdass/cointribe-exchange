@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Headers, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Headers, Req, Res, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -8,6 +8,7 @@ import { AuthGuard as Auth } from 'src/guard/auth/auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { TokenService } from 'src/auth/token.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { UpdateUserDto } from './dto/login-user.dto';
 
 @Controller('user')
@@ -40,11 +41,7 @@ export class UserController {
     const user = this.tokenService.decode(auth);
     return this.userService.logout(user);
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
+  
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: any) {
     return this.userService.update(+id, updateUserDto);
@@ -55,15 +52,18 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  // @Get('google')
-  // @UseGuards(AuthGuard('google'))
-  // async googleLogin(@Request() req) {
-  //   return req.user;
-  // }
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.userService.forgotPassword(forgotPasswordDto);
+  }
+  @Get('confirm-email')
+  confirmEmail(@Query('token') token: string) {
+    return this.userService.confirmEmail(token);
+  }
 
-  // @Get('auth/google/callback')
-  // @UseGuards(AuthGuard('google'))
-  // async callback(@Req() req, @Res() res) {
-  //   return this.authService.googleLogin(req.user);
-  // }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
+  }
+
 }

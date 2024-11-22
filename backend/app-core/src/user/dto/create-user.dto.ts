@@ -1,4 +1,5 @@
-import { IsBoolean, IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsBoolean, IsDate, IsEmail, IsNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
     @IsString()
@@ -21,5 +22,8 @@ export class CreateUserDto {
     password: string;
 
     @IsBoolean()
-    loggedInByGoogle: boolean
+    loggedInByGoogle: boolean = false
+
+    @IsDate()
+    emailVerifiedAt: Date | null
 }
