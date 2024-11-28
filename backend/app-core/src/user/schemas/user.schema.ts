@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import paginate from 'mongoose-paginate-v2';
 import { Types } from "mongoose";
 import { Wallet } from "src/wallet/schemas/wallet.schema";
 
@@ -33,7 +34,22 @@ export class User {
 
     @Prop({default: null})
     emailVerifiedAt: Date | null;
+
+    @Prop({ default: 1 })
+    status: number;
 }
-
-
 export const UserSchema = SchemaFactory.createForClass(User);
+
+export const applyPaginatePluginHook: any = async (schema) => {
+    await new Promise((resolve) => {
+        schema.plugin(paginate, () => {
+            console.log('Plugin applied');
+            resolve(true);
+        });
+    });
+};
+
+  
+
+
+

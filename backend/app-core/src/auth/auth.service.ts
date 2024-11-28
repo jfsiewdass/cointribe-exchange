@@ -57,13 +57,20 @@ export class AuthService {
       session.startTransaction();
       const user = await this.userService.getUserByEmail(userDto.email);
       
-      const payload = { email: userDto.email, firstName: userDto.firstName, lastName: userDto.lastName, wallet: user?.wallets[0], verified: true };
+      const payload = { 
+        email: userDto.email, 
+        firstName: userDto.firstName ?? '', 
+        lastName: userDto.lastName ?? '', 
+        wallet: user?.wallets[0], 
+        verified: true,
+        status: user?.status ?? 1
+       };
       if (!user) {
         userDto.loggedInByGoogle = true
         userDto.emailVerifiedAt = new Date();
         const createUser = new this.userModel(userDto);
         createUser.password = await this.hashService.hashPassword('12345678');
-        if (!createUser.save({ session: session })) 
+        if (!await createUser.save({ session: session })) 
           throw new HttpException("User not created", HttpStatus.BAD_REQUEST);
 
         let walletContract = await  this.walletContractModel.findOneAndUpdate(
@@ -110,10 +117,11 @@ export class AuthService {
       }
       
       session.commitTransaction();
+      session.endSession();
       return btoa(JSON.stringify(AUTH));
     } catch (error) {
+      await session.abortTransaction();
       this.logger.error(error.toString());
-      session.abortTransaction();
       return GenericExceptionResponse(error);
     } finally {
       session.endSession();

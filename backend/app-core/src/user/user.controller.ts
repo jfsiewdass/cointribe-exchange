@@ -9,6 +9,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { TokenService } from 'src/auth/token.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { FilterDto } from './dto/filter.dto';
 // import { UpdateUserDto } from './dto/login-user.dto';
 
 @Controller('user')
@@ -61,9 +62,9 @@ export class UserController {
     return this.userService.confirmEmail(token);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @Get('all')
+  getAll(@Query() params: FilterDto) {
+    return this.userService.findAll(params);
   }
 
 }

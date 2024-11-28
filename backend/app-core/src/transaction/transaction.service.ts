@@ -8,7 +8,6 @@ import { QueryDto } from './dto/query.dto';
 import { GenericResponse } from 'src/common/interfaces/generic-response';
 import { StatusEnum } from 'src/common/enums/status.enum';
 import { TxEnum } from 'src/common/enums/transaction-type.enum';
-import { query } from 'express';
 
 @Injectable()
 export class TransactionService {
@@ -24,16 +23,12 @@ export class TransactionService {
       { _id: 0, __v: 0 }
     ).exec();
 
-    if (data) {
-      return data;
-    }
+
+    return GenericResponse(data, '');
   }
 
   async getTransactions(email: string, queryDto: QueryDto) {
     // const { page, limit } = queryDto
-    
-    
-    
     const data = await this.userModel.aggregate([
       { $match: { email } },
       { $unwind: '$wallets' },
@@ -68,55 +63,50 @@ export class TransactionService {
               foreignField: "_id",
               as: "transactionData"
             }
-          },
-          {
-            $project: {
-              _id: 0,
-              transactionData: {
-                $slice: [
-                  "$transactionData",
-                  (page - 1) * limit,
-                  limit
-                ]
-              }
+          }])
+          .project({
+            _id: 0,
+            transactionData: {
+              $slice: [
+                "$transactionData",
+                (page - 1) * limit,
+                limit
+              ]
             }
-          }
-        ]).exec();
+          }).sort({ 'transactionData.createdAt': -1 }).exec();
         
         if (data && data.length > 0) {
           
-          const transactions = data[0].transactionData.map(transaction => {
-
-              return  {
-                typeId: transaction.nature,
-                type: TxEnum[transaction.nature],
-                currency: 'USDT',
-                txHash: transaction.txHash,
-                transactionId: transaction._id,
-                created_at: transaction.created_at,
-                confirmations: transaction.confirmations,
-                statusId: transaction.status,
-                status: StatusEnum[transaction.status],
-                amount: transaction.amount
-              }
+          const transactions = data[0].transactionData.map(tx => {
+            console.log(tx);
             
+            return  {
+              typeId: tx.nature,
+              type: TxEnum[tx.nature],
+              currency: 'USDT',
+              txHash: tx.txHash,
+              transactionId: tx._id,
+              created_at: tx.created_at,
+              confirmations: tx.confirmations,
+              statusId: tx.status,
+              status: StatusEnum[tx.status],
+              amount: tx.amount
+            }
+          }).sort((a, b) => {
+            // Convertir las fechas a objetos Date para una comparación precisa
+            const dateA = new Date(a.created_at || '1970-01-01T00:00:00Z');
+            const dateB = new Date(b.created_at || '1970-01-01T00:00:00Z');
+          
+            // Ordenar de forma ascendente (más antiguo a más reciente)
+            return Number(dateA) - Number(dateB);
           })
-          const response: GenericResponse<any> = {
-            status: 'STATUS',
-            statusCode: 200,
-            data: transactions,
-            message: 'Logged success'
-          }
-          return response;
+          
+          return GenericResponse(transactions, 'transactions');
         }
-        const response: GenericResponse<any> = {
-          status: 'STATUS',
-          statusCode: 200,
-          data: [],
-          message: 'Logged success'
-        }
-        return response;
+        
       }
+     
     }
+    return GenericResponse([], 'transactions');
   }
 }

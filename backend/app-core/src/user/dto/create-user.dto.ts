@@ -25,5 +25,8 @@ export class CreateUserDto {
     loggedInByGoogle: boolean = false
 
     @IsDate()
-    emailVerifiedAt: Date | null
+    emailVerifiedAt: Date | null;
+
+    @IsNumber()
+    stauts: number = 1
 }

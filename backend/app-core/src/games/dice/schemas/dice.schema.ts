@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
-import { Wallet } from "src/wallet/schemas/wallet.schema";
 
 export type DiceDocument = Dice & Document;
 export interface Option {
@@ -10,7 +9,7 @@ export interface Option {
 
 @Schema()
 export class Dice {
-    @Prop({ type: [{ name: String, multipliedBy: Number }] })
+    @Prop({ type: [{ name: String, multipliedBy: Number, amount: Number }] })
     options: Option[];
 
     @Prop()

@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
-import { Connection, Model } from 'mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { HashService } from './hash.service';
 import { GenericExceptionResponse, GenericResponse } from 'src/common/interfaces/generic-response';
 import { AuthDto } from 'src/auth/dto/auth-dto';
@@ -15,12 +15,25 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { WalletContract, WalletContractDocument } from 'src/wallet/schemas/wallet-contract.schema';
 import { Wallet, WalletDocument } from 'src/wallet/schemas/wallet.schema';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { FilterDto } from './dto/filter.dto';
+import { IPaginate } from 'src/common/utils/paginate';
 
 
 interface EmailData {
   email: string;
   name: string;
   link: string;
+}
+
+interface WalletQuery {
+  address: any
+}
+interface UserFilterQuery {
+  firstName?: any;
+  lastName?: any;
+  email?: any;
+  status?: number;
+  walletsData?: WalletQuery;
 }
 @Injectable()
 export class UserService {
@@ -145,8 +158,50 @@ export class UserService {
     return GenericResponse(true, 'Logout success');
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll(params: FilterDto) {
+    const { email, firstName, lastName, status, wallet } = params
+    const page = parseInt(params.page) ?? 0
+    const limit = parseInt(params.limit) ?? 10
+    
+    const skip = (page) * limit;
+    const filters: UserFilterQuery = {}
+    if (email) filters.email = { $regex: new RegExp(email.trim(), 'i') };
+    if (firstName) filters.firstName = { $regex: new RegExp(firstName.trim(), 'i') };
+    if (lastName) filters.lastName = { $regex: new RegExp(lastName.trim(), 'i') };
+    if (status) filters.status = parseInt(status);
+
+    try {
+      const users = await this.userModel.aggregate([
+        { $match: filters },
+        {
+          $lookup: {
+            from: "wallets", // Assuming your Wallet model is named 'Wallet'
+            localField: "wallets",
+            foreignField: "_id",
+            as: "walletsData"
+          }
+        },
+        { $unwind: "$walletsData" },
+        {
+          $match:{
+            $or: [
+              { "walletsData.address": { $regex: new RegExp(wallet?.trim(), 'i') } },
+              { "walletsData.address": { $exists: false } } // If wallet is not provided
+            ]
+          }
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit:limit }
+      ]).exec();
+  
+      const totalUsers = await this.userModel.find().countDocuments();
+      const options: IPaginate<User> = { page, limit, totalPages: Math.ceil(totalUsers / limit), total: totalUsers,  data: users }
+
+      return GenericResponse(options, 'users');
+    } catch(err) {
+      return  GenericExceptionResponse(err);
+    }
   }
 
   findOne(id: number) {
@@ -185,8 +240,8 @@ export class UserService {
           </head>
           <body>
             <div class="container">
-              <img src="path/to/your/logo.jpg" alt="Logo" style="max-width: 200px; display: block; margin: 20px auto;">
-              <h1>Bienvenido al aplicativo</h1>
+              <img src="../../public/images/logo.svg" alt="Logo" style="max-width: 200px; display: block; margin: 20px auto;">
+              <h1>BIENVENIDO A COINTRIBE</h1>
               <p>Para confirmar la dirección de correo electrónico, <a href="${mailData.link}" target="_blank" rel="noopener noreferrer">haga clic aquí</a>.</p>
             </div>
           </body>

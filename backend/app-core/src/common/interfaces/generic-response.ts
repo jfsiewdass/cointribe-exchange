@@ -7,13 +7,25 @@ export interface GenericResponse<Type> {
     message: string
 }
 
-export function GenericExceptionResponse<T>(exception: HttpException): GenericResponse<T> {
-    return {
-        status: exception?.getStatus() === 401 ? 'Unauthorized' : 'Error',
-        statusCode: exception?.getStatus() ?? 500,
-        data: null,
-        message: exception?.message,
-    };
+export function GenericExceptionResponse<T>(exception: HttpException | any): GenericResponse<T> {
+    let statusCode = 500;
+    let message = 'Internal Server Error';
+
+    if (exception instanceof HttpException) {
+        statusCode = exception.getStatus();
+        message = exception.message;
+
+    } else if (exception instanceof Error) {
+        statusCode = 500;
+        message = exception.message;
+    }
+
+  return {
+    status: statusCode === 401 ? 'Unauthorized' : 'Error',
+    statusCode,
+    data: null,
+    message,
+  };
 }
 
 export function GenericResponse<Type>(type: Type, message: string, status: HttpStatus = 200): GenericResponse<Type> {
