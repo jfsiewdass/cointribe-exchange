@@ -43,14 +43,14 @@ export class UserController {
     return this.userService.logout(user);
   }
   
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: any) {
-    return this.userService.update(+id, updateUserDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateUserDto: any) {
+  //   return this.userService.update(+id, updateUserDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Patch('change')
+  change(@Body() body: any) {
+    return this.userService.setStatus(body.id);
   }
 
   @Post('forgot-password')

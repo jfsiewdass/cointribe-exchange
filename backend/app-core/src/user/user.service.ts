@@ -212,8 +212,11 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async setStatus(id: string) {
+    const user = await this.userModel.findById(id).exec();
+    user.status = user.status == 1 ? 0 : 1
+    await user.save();
+    return GenericResponse(true, 'Status changed');
   }
   async sendVerificationLink(mailData: EmailData): Promise<boolean> {
  

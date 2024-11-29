@@ -78,7 +78,6 @@ export class TransactionService {
         if (data && data.length > 0) {
           
           const transactions = data[0].transactionData.map(tx => {
-            console.log(tx);
             
             return  {
               typeId: tx.nature,
